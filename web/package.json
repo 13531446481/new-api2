@@ -5,6 +5,7 @@
   "type": "module",
   "dependencies": {
     "@douyinfe/semi-icons": "^2.46.1",
+    "@douyinfe/semi-icons-lab": "^2.58.0",
     "@douyinfe/semi-ui": "^2.55.3",
     "@visactor/react-vchart": "~1.8.8",
     "@visactor/vchart": "~1.8.8",

@@ -54,7 +54,24 @@ function App() {
         linkElement.href = logo;
       }
     }
-  }, []);
+    
+    const handlePostMessage = (event) => {
+      const trustedOrigins = [
+        'https://api-test-index.787743.top', 
+        // 其他你信任的子域
+      ];
+      if (trustedOrigins.includes(event.origin)) {
+        if (event.data && event.data.type === 'navigate') {
+          const newUrl = window.location.href + event.data.url;
+          window.location.href = newUrl; 
+        }
+      }
+    };
+    window.addEventListener('message', handlePostMessage);
+    return () => {
+      window.removeEventListener('message', handlePostMessage);
+    };
+}, []);
 
   return (
     <Layout>

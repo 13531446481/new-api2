@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { UserContext } from '../context/User';
 import { StatusContext } from '../context/Status';
+import { Avatar, Divider, Layout, Nav } from '@douyinfe/semi-ui';
 
 import {
   API,
@@ -10,31 +11,29 @@ import {
   isAdmin,
   isMobile,
   showError,
+  showSuccess
 } from '../helpers';
 import '../index.css';
-
 import {
-  IconCalendarClock,
   IconComment,
-  IconCreditCard,
   IconGift,
   IconHistogram,
   IconHome,
-  IconImage,
   IconKey,
-  IconLayers,
   IconPriceTag,
   IconSetting,
-  IconUser,
+  IconExit,
+  IconCreditCard
 } from '@douyinfe/semi-icons';
-import { Layout, Nav } from '@douyinfe/semi-ui';
+import { IconIntro, IconRating, IconForm, IconToken, IconImage, IconBanner, IconTag, IconSlider, IconWheelChair, IconProgress } from '@douyinfe/semi-icons-lab';
 import { setStatusData } from '../helpers/data.js';
-
+import { stringToColor } from '../helpers/render';
 // HeaderBar Buttons
 
 const SiderBar = () => {
   const [userState, userDispatch] = useContext(UserContext);
   const [statusState, statusDispatch] = useContext(StatusContext);
+  const [showSidebar, setShowSidebar] = useState(false);
   const defaultIsCollapsed =
     isMobile() || localStorage.getItem('default_collapse_sidebar') === 'true';
 
@@ -58,7 +57,18 @@ const SiderBar = () => {
     chat: '/chat',
     detail: '/detail',
     pricing: '/pricing',
+    login: 'login'
   };
+
+  async function logout() {
+    setShowSidebar(false);
+    await API.get('/api/user/logout');
+    showSuccess('注销成功!');
+    userDispatch({ type: 'logout' });
+    localStorage.removeItem('user');
+    navigate('/login');
+  }
+
 
   const headerButtons = useMemo(
     () => [
@@ -66,20 +76,20 @@ const SiderBar = () => {
         text: '首页',
         itemKey: 'home',
         to: '/',
-        icon: <IconHome />,
+        icon: <IconIntro />,
       },
       {
         text: '渠道',
         itemKey: 'channel',
         to: '/channel',
-        icon: <IconLayers />,
+        icon: <IconSlider />,
         className: isAdmin() ? 'semi-navigation-item-normal' : 'tableHiddle',
       },
       {
         text: '聊天',
         itemKey: 'chat',
         to: '/chat',
-        icon: <IconComment />,
+        icon: <IconComment style={{ color: '#dda0dd' }} />,
         className: localStorage.getItem('chat_link')
           ? 'semi-navigation-item-normal'
           : 'tableHiddle',
@@ -88,45 +98,39 @@ const SiderBar = () => {
         text: '令牌',
         itemKey: 'token',
         to: '/token',
-        icon: <IconKey />,
+        icon: <IconKey style={{ color: '#1c90ed' }} />,
       },
       {
         text: '兑换码',
         itemKey: 'redemption',
         to: '/redemption',
-        icon: <IconGift />,
+        icon: <IconGift style={{ color: '#f82c2c' }} />,
         className: isAdmin() ? 'semi-navigation-item-normal' : 'tableHiddle',
-      },
-      {
-        text: '钱包',
-        itemKey: 'topup',
-        to: '/topup',
-        icon: <IconCreditCard />,
       },
       {
         text: '模型价格',
         itemKey: 'pricing',
         to: '/pricing',
-        icon: <IconPriceTag />,
+        icon: <IconRating />,
       },
       {
         text: '用户管理',
         itemKey: 'user',
         to: '/user',
-        icon: <IconUser />,
+        icon: <IconWheelChair />,
         className: isAdmin() ? 'semi-navigation-item-normal' : 'tableHiddle',
       },
       {
         text: '日志',
         itemKey: 'log',
         to: '/log',
-        icon: <IconHistogram />,
+        icon: <IconForm />,
       },
       {
         text: '数据看板',
         itemKey: 'detail',
         to: '/detail',
-        icon: <IconCalendarClock />,
+        icon: <IconBanner />,
         className:
           localStorage.getItem('enable_data_export') === 'true'
             ? 'semi-navigation-item-normal'
@@ -142,18 +146,19 @@ const SiderBar = () => {
             ? 'semi-navigation-item-normal'
             : 'tableHiddle',
       },
-      {
-        text: '设置',
-        itemKey: 'setting',
-        to: '/setting',
-        icon: <IconSetting />,
-      },
       // {
-      //     text: '关于',
-      //     itemKey: 'about',
-      //     to: '/about',
-      //     icon: <IconAt/>
-      // }
+      //   text: '设置',
+      //   itemKey: 'setting',
+      //   to: '/setting',
+      //   icon: <IconToken />,
+      // },
+      // {
+      //   text: '余额充值',
+      //   itemKey: 'topup',
+      //   to: '/topup',
+      //   icon: <IconTag />,
+      // },
+
     ],
     [
       localStorage.getItem('enable_data_export'),
@@ -181,7 +186,7 @@ const SiderBar = () => {
     loadStatus().then(() => {
       setIsCollapsed(
         isMobile() ||
-          localStorage.getItem('default_collapse_sidebar') === 'true',
+        localStorage.getItem('default_collapse_sidebar') === 'true',
       );
     });
     let localKey = window.location.pathname.split('/')[1];
@@ -189,6 +194,12 @@ const SiderBar = () => {
       localKey = 'home';
     }
     setSelectedKeys([localKey]);
+    const user = localStorage.getItem('user');
+    if (user) {
+      userDispatch({ type: 'setUser', payload: JSON.parse(user) });
+    } else {
+      userDispatch({ type: 'logout' });
+    }
   }, []);
 
   return (
@@ -227,11 +238,39 @@ const SiderBar = () => {
               ),
               text: systemName,
             }}
-            // footer={{
-            //   text: '© 2021 NekoAPI',
-            // }}
           >
-            <Nav.Footer collapseButton={true}></Nav.Footer>
+            <Nav.Footer style={{ display: 'block' }}>
+              <Divider margin='12px'></Divider>
+              <>{userState.user ? (
+                <>
+                  <Link to="/setting" style={{ textDecoration: 'none' }}>
+                    <Nav.Item
+                      itemKey="setting"
+                      text={userState.user.username}
+                      style={{ alignItems: 'center' }}
+                      icon={
+                        <Avatar
+                          size='extra-extra-small'
+                          color={stringToColor(userState.user.username)}
+                          style={{ margin: '4px', display: 'flex' }}
+                        >
+                          {userState.user.username[0]}
+                        </Avatar>
+                      }
+                    />
+                  </Link>
+                  <Link to="/topup" style={{ textDecoration: 'none' }}>
+                    <Nav.Item itemKey="topup" text="余额充值" icon={<IconCreditCard />} />
+                  </Link>
+                  <Nav.Item onClick={logout} icon={<IconExit />} text="退出"></Nav.Item>
+                </>
+              ) : (
+                <Link to="/login" style={{ textDecoration: 'none' }}>
+                  <Nav.Item itemKey="login" text="登录" icon={<IconProgress />} />
+                </Link>
+              )}</>
+              <Nav.Footer collapseButton={true} />
+            </Nav.Footer>
           </Nav>
         </div>
       </Layout>
