@@ -58,7 +58,7 @@ function App() {
     const handlePostMessage = (event) => {
       const trustedOrigins = [
         'https://api-test-index.787743.top', 
-        'https://dollor.yytech.chat/',
+        'https://dollor.yytech.chat',
         // 其他你信任的子域
       ];
       if (trustedOrigins.includes(event.origin)) {
