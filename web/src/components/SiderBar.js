@@ -15,6 +15,7 @@ import {
 } from '../helpers';
 import '../index.css';
 import {
+  IconCalendarClock, IconChecklistStroked,
   IconComment,
   IconGift,
   IconHistogram,
@@ -57,7 +58,8 @@ const SiderBar = () => {
     chat: '/chat',
     detail: '/detail',
     pricing: '/pricing',
-    login: 'login'
+    login: 'login',
+    task: '/task',
   };
 
   async function logout() {
@@ -146,23 +148,22 @@ const SiderBar = () => {
             ? 'semi-navigation-item-normal'
             : 'tableHiddle',
       },
-      // {
-      //   text: '设置',
-      //   itemKey: 'setting',
-      //   to: '/setting',
-      //   icon: <IconToken />,
-      // },
-      // {
-      //   text: '余额充值',
-      //   itemKey: 'topup',
-      //   to: '/topup',
-      //   icon: <IconTag />,
-      // },
+      {
+        text: '异步任务',
+        itemKey: 'task',
+        to: '/task',
+        icon: <IconChecklistStroked />,
+        className:
+            localStorage.getItem('enable_task') === 'true'
+                ? 'semi-navigation-item-normal'
+                : 'tableHiddle',
+      },
 
     ],
     [
       localStorage.getItem('enable_data_export'),
       localStorage.getItem('enable_drawing'),
+      localStorage.getItem('enable_task'),
       localStorage.getItem('chat_link'),
       isAdmin(),
     ],
